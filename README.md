@@ -3,7 +3,7 @@
 Yet another parser for ISO 10303-11 / EXPRESS schemas and IFC files.
 
 Yes, I know, IfcOpenShell is a great project, full respect to the team behind it, really, it's just not what I needed and not
-how I need it (python hooks, a *working* string un-escaping, etv.), and I don't intend to fix it / mess it up.
+how I need it (python hooks, a *working* string un-escaping, etc.), and I don't intend to fix it / mess it up.
 
 So here we are, yet another parser.
 
@@ -118,7 +118,7 @@ This way the class lookup by name is done automatically and as it uses a dict, i
 Just don't forget to explicitely import your classes in `Database.py` as the module will only be registered when it is loaded,
 and will be loaded when it is used, and will be used only if registered :), so an explicite import is needed anyway.
 
-These decorators are intensively used by the classes in `Ifc_All.py`, which is generated from the schema definition files.
+These decorators are intensely used by the classes in `Ifc_All.py`, which is generated from the schema definition files.
 
 
 ## Schema-to-Python converter
@@ -183,7 +183,7 @@ Compared to the stuff above, it is simple and straightforward:
 * snoops up the .ifc file statement by statement
 * applies the appropriate parser to it
 * collects the result
-* ** IMPLEMENTED UP TO THIS POINT **
+* **IMPLEMENTED UP TO THIS POINT**
 * resolves the references
 * and here we get all the data in a nice DOM structure
 
@@ -196,8 +196,8 @@ Until then we can access the entities by their indices:
 ./dump_data.py -f data/Template.ifc -H -j
 ```
 
-** NOTE **
-* When dumping objects as plain strings, lists won't call `__str__` of their content,
+**NOTE**
+When dumping objects as plain strings, lists won't call `__str__` of their content,
 but their `__repr__`, so we'll get lines like this:
 
 ```
@@ -205,6 +205,6 @@ but their `__repr__`, so we'll get lines like this:
 <Ifc.IfcBase.Reference instance at 0x2a0fb2ac>]:UnitType:<.THERMALCONDUCTANCEUNIT.>:UserDefinedType:None
 ```
 
-It completely defeats the purpose, however, this is a known and intended behaviour, but it is definitely the most pythonic way,
-as [Guido doesn't like the idea of lists calling __str__](https://www.python.org/dev/peps/pep-3140/)...
+It completely defeats the purpose, but this is a known and intended behaviour and it is definitely the most pythonic way,
+as [Guido doesn't like the idea of lists calling `__str__`](https://www.python.org/dev/peps/pep-3140/)...
 
