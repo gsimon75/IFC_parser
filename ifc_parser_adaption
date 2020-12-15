@@ -1,0 +1,21 @@
+We copied the ifc_parser code from https://github.com/gsimon75/IFC_parser (commit: 4f6a8e037eab743449d14edbfc15640e8ef6dec6).
+
+Since the original code is python 2.*, we had to adapt to our purposes:
+- xrange was changed to range
+- imports had to be scoped with their namespace
+- print was changed to print()
+- unichr was changed to chr
+- extensions of the two template files were changed to .txt
+- variables s and pos were swapped in transcode_string_literal (lines 170-175)
+- pycharm 'Reformat code' were run across ifc_parser
+- tail remarks are removed from EXPRESS file before parsing
+- parsing of defspec in Entity was adapted so that it can handle statements like ABSTRACT SUPERTYPE and ABSTRACT SUPERTYPE OF
+(they are needed for ISO15926)
+- parsing of defspec in Entity was adapted so that it can handle statements like SUBTYPE OF(
+(they are needed for HQDM)
+- constructor for TYPE allows for null parser
+- empty defspec attributes for Type allowed
+
+# START EDIT - AMi 20201210
+These comment sections have been added to note where the code has been changed to allow objects to store the code blocks that created them
+# END EDIT
