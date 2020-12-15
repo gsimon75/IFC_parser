@@ -1,6 +1,7 @@
 classes = dict()
 definitions = dict()
 
+
 def ifc_class(cls):
     """
     Decorator for implicitely registering an IFC class

@@ -1,4 +1,5 @@
-from ClassRegistry import ifc_definition
+from nf_express_source.ifc_parser.Ifc.ClassRegistry import ifc_definition
+
 
 @ifc_definition
 class Schema:
@@ -37,7 +38,6 @@ class Schema:
                 self.classes[d.classname] = {}
 
             self.classes[d.classname][d.defname] = d
-
 
     def __str__(self):
         return "Schema({dn})".format(dn=self.defname)

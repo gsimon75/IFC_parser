@@ -1,4 +1,5 @@
-from ClassRegistry import ifc_definition
+from nf_express_source.ifc_parser.Ifc.ClassRegistry import ifc_definition
+
 
 @ifc_definition
 class Rule:

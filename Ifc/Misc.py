@@ -1,8 +1,10 @@
 import json
-import uuid
+import re
 import struct
-from ClassRegistry import create_entity
-from IfcBase import Omitted, Reference, EnumValue, omitted
+import uuid
+
+from nf_express_source.ifc_parser.Ifc.ClassRegistry import create_entity
+from nf_express_source.ifc_parser.Ifc.IfcBase import Reference, EnumValue, omitted
 
 
 class StatementFileReader:
@@ -19,7 +21,6 @@ class StatementFileReader:
         self.string_delimiter = string_delimiter
         self.reset_state()
 
-
     def reset_state(self):
         """
         Reset the reading/parsing state machine
@@ -33,7 +34,6 @@ class StatementFileReader:
         self.statement_buf = ""
         self.statement_until = 0
 
-
     def read_chunk(self):
         """
         Read one non-comment chunk from the input, chunk delimiters being newline, comment boundary and string literal boundary.
@@ -44,7 +44,9 @@ class StatementFileReader:
             if not self.in_string_literal:
                 # read more if needed
                 if not self.chunk_buf:
-                    self.chunk_buf = self.fd.readline()
+                    chunk = self.fd.readline()
+                    commentless_chunk = self.__remove_comments_from_chunk(chunk=chunk)
+                    self.chunk_buf = commentless_chunk
                     if not self.chunk_buf:
                         return None
 
@@ -79,7 +81,7 @@ class StatementFileReader:
                     result = self.chunk_buf
                     self.chunk_buf = ""
 
-            else: # self.in_string_literal
+            else:  # self.in_string_literal
                 string_literal_end = self.chunk_buf.find(self.string_delimiter, self.string_literal_until)
                 if string_literal_end == -1:
                     # delimiter not found, read more
@@ -93,7 +95,8 @@ class StatementFileReader:
                     continue
 
                 # check if it is a '', which marks the apostrophe itself (facepalm)
-                if ((string_literal_end + 1) < len(self.chunk_buf)) and (self.chunk_buf[string_literal_end + 1] == self.string_delimiter):
+                if ((string_literal_end + 1) < len(self.chunk_buf)) and (
+                        self.chunk_buf[string_literal_end + 1] == self.string_delimiter):
                     self.string_literal_until = string_literal_end + 1 + len(self.string_delimiter)
                     continue
 
@@ -105,12 +108,26 @@ class StatementFileReader:
                     self.chunk_buf = ""
                 self.in_string_literal = False
                 self.string_literal_until = 0
-                return result; # DO return it, even the empty string will result in ''
+                return result;  # DO return it, even the empty string will result in ''
 
             result = result.strip("\r\n")
             if result:
                 return result
 
+    def __remove_comments_from_chunk(
+            self,
+            chunk: str) -> str:
+        comment_re = \
+            re.compile(
+                '--.+\n')
+
+        commentless_chunk = \
+            comment_re.sub(
+                repl='',
+                string=chunk)
+
+        return \
+            commentless_chunk
 
     def read_statement(self, permit_eof=True, zap_whitespaces=False):
         """
@@ -128,7 +145,7 @@ class StatementFileReader:
                     return result
 
             new_chunk = self.read_chunk()
-            if new_chunk == None: # EOF
+            if new_chunk == None:  # EOF
                 if not self.statement_buf:
                     # no leftover, return None to signal the end
                     if permit_eof:
@@ -144,10 +161,9 @@ class StatementFileReader:
                     return result.strip()
 
             self.statement_until = len(self.statement_buf)
-            if new_chunk[0] == "\"": # it was a string literal
-                self.statement_until += len(new_chunk) # don't check semicolon in
+            if new_chunk[0] == "\"":  # it was a string literal
+                self.statement_until += len(new_chunk)  # don't check semicolon in
             self.statement_buf = self.statement_buf + new_chunk
-
 
     def transcode_string_literal(self, s):
         """
@@ -160,7 +176,7 @@ class StatementFileReader:
             pos = s.find(self.string_delimiter, pos)
             if pos == -1:
                 break
-            s = s[:pos] + s[pos + len(self.string_delimiter):] # leave only the second one
+            s = s[:pos] + s[pos + len(self.string_delimiter):]  # leave only the second one
             pos += 1
 
         # Don't blame me, that's how they 'invented' (or rather 'unvented') it...
@@ -170,11 +186,11 @@ class StatementFileReader:
         while pos > 0:
             if s[pos:pos + 3] == "\\S\\":
                 # FIXME: handle missing/invalid arg
-                s = s[:pos] + unichr(ord(pos[s + 3]) + 0x80) + s[pos + 4:]
+                s = s[:pos] + chr(ord(s[pos + 3]) + 0x80) + s[pos + 4:]
                 pos -= 3
             elif s[pos:pos + 3] == "\\X\\":
                 # FIXME: handle missing/invalid arg
-                s = s[:pos] + unichr(int(pos[s + 3:s + 5], base=16)) + s[pos + 5:]
+                s = s[:pos] + chr(int(s[pos + 3:pos + 5], base=16)) + s[pos + 5:]
                 pos -= 3
             elif s[pos:pos + 4] == "\\X0\\":
                 s = s[:pos] + s[pos + 4:]
@@ -183,13 +199,13 @@ class StatementFileReader:
             elif s[pos:pos + 4] == "\\X2\\":
                 if endpos < pos + 4:
                     raise SyntaxError("Unterminated X2 escape block in {val}".format(val=s))
-                s = s[:pos] + "".join(unichr(int(s[i:i + 4], base=16)) for i in xrange(pos + 4, endpos, 4)) + s[endpos:]
+                s = s[:pos] + "".join(chr(int(s[i:i + 4], base=16)) for i in range(pos + 4, endpos, 4)) + s[endpos:]
                 endpos = -1
                 pos -= 3
             elif s[pos:pos + 4] == "\\X4\\":
                 if endpos < pos + 4:
                     raise SyntaxError("Unterminated X4 escape block in {val}".format(val=s))
-                s = s[:pos] + "".join(unichr(int(s[i:i + 8], base=16)) for i in xrange(pos + 4, endpos, 8)) + s[endpos:]
+                s = s[:pos] + "".join(chr(int(s[i:i + 8], base=16)) for i in range(pos + 4, endpos, 8)) + s[endpos:]
                 endpos = -1
                 pos -= 3
             else:
@@ -209,7 +225,7 @@ def find_matching_paren_pair(s):
     """
     paren_level = -1
     open_pos = 0
-    for i in xrange(0, len(s)):
+    for i in range(0, len(s)):
         if s[i] == "(":
             paren_level += 1
             if paren_level == 0:
@@ -234,14 +250,14 @@ def parse_expression(s):
     - list (parenthesis-delimited, comma-separated)
     """
     s = s.strip()
-    #print("parse_expression('{val}')".format(val=s))
-    if s[0] == "$": # unset
+    # print("parse_expression('{val}')".format(val=s))
+    if s[0] == "$":  # unset
         return None
-    elif s[0] == "*": # omitted
+    elif s[0] == "*":  # omitted
         return omitted
-    elif s[0] == "#": # reference
+    elif s[0] == "#":  # reference
         return Reference(int(s[1:]))
-    elif s[0] == ".": # enum value
+    elif s[0] == ".":  # enum value
         if s == ".T.":
             return True
         elif s == ".F.":
@@ -251,17 +267,17 @@ def parse_expression(s):
         elif s[-1] != ".":
             raise SyntaxError("Unterminated enum value '{val}'".format(val=s))
         return EnumValue(s[1:-1])
-    elif s[0] == "\"": # string
+    elif s[0] == "\"":  # string
         if s[-1] != "\"":
             raise SyntaxError("Unterminated string value '{val}'".format(val=s))
         return json.loads(s)
-    elif s[0] == "(": # list
+    elif s[0] == "(":  # list
         items = []
         paren_level = -1
         item_start = 0
         within_quote = False
         after_backslash = False
-        for i in xrange(0, len(s)):
+        for i in range(0, len(s)):
             if within_quote:
                 if after_backslash:
                     after_backslash = False
@@ -275,7 +291,7 @@ def parse_expression(s):
                 paren_level += 1
                 if paren_level == 0:
                     item_start = i + 1
-            elif (s[i] == ",") and (paren_level == 0): # top-level comma
+            elif (s[i] == ",") and (paren_level == 0):  # top-level comma
                 items.append(parse_expression(s[item_start:i]))
                 item_start = i + 1
             elif s[i] == ")":
@@ -287,12 +303,12 @@ def parse_expression(s):
                     return items
                 paren_level -= 1
         raise SyntaxError("Unterminated list '{val}'".format(val=s))
-    elif (s[0] == "+") or (s[0] == "-") or (("0" <= s[0]) and (s[0] <= "9")): # number
+    elif (s[0] == "+") or (s[0] == "-") or (("0" <= s[0]) and (s[0] <= "9")):  # number
         if s.find(".") == -1:
             return int(s)
         else:
             return float(s)
-    else: # entity
+    else:  # entity
         return parse_entity(s)
 
 
@@ -307,7 +323,7 @@ def parse_entity(s):
         raise SyntaxError("Invalid entity specification '{val}'".format(val=s))
     rtype = s[:open_pos].strip()
     args = parse_expression(s[open_pos:])
-    args.reverse() # passed in *reverse* order so the classes can just args.pop() their argument off of it
+    args.reverse()  # passed in *reverse* order so the classes can just args.pop() their argument off of it
     return create_entity(rtype, args)
 
 
@@ -321,7 +337,8 @@ IFC_symbol_to_num = {
     "e": 0x28, "f": 0x29, "g": 0x2a, "h": 0x2b, "i": 0x2c, "j": 0x2d, "k": 0x2e, "l": 0x2f,
     "m": 0x30, "n": 0x31, "o": 0x32, "p": 0x33, "q": 0x34, "r": 0x35, "s": 0x36, "t": 0x37,
     "u": 0x38, "v": 0x39, "w": 0x3a, "x": 0x3b, "y": 0x3c, "z": 0x3d, "_": 0x3e, "$": 0x3f
-    }
+}
+
 
 #    "03ysyxbDL43OX0YOp9OPQ_" -> {03F36F3B-94D5-440D-8840-898CC96196BE}
 #
@@ -372,6 +389,7 @@ class IfcJSONEncoder(json.JSONEncoder):
     https://stackoverflow.com/a/24030569
 
     """
+
     def default(self, obj):
         if hasattr(obj, '__json__'):
             return obj.__json__()
@@ -380,3 +398,5 @@ class IfcJSONEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 # vim: set sw=4 ts=4 et:
+
+

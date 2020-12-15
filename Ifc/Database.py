@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-from Misc import StatementFileReader, parse_entity
-from IfcBase import IfcEntity, IfcGenericEntity, STEPHeader
-import STEP_Header_Parts
-import time
 import sys
+import time
+
+from nf_express_source.ifc_parser.Ifc.IfcBase import STEPHeader
+from nf_express_source.ifc_parser.Ifc.Misc import StatementFileReader, parse_entity
+
 
 class Database(StatementFileReader):
     """
@@ -17,7 +18,6 @@ class Database(StatementFileReader):
         StatementFileReader.__init__(self, comment_open="/*", comment_close="*/")
         self.header = None
         self.entities = {}
-
 
     def read_data_file(self, filename):
         """
@@ -48,25 +48,28 @@ class Database(StatementFileReader):
                 e = parse_entity(s)
                 self.header.add(e)
 
-
         last_printout_time = time.time()
         # read all entities from the input
         while True:
             s = self.read_statement()
             if s == None:
                 break
-            #print "Statement: {s}".format(s=s)
+            # print "Statement: {s}".format(s=s)
 
             if s == "ENDSEC":
                 break
-           
+
             # split to 'Index=Entity'
             equal_pos = s.find("=")
-            if s[0] != "#" or  equal_pos == -1:
+            if s[0] != "#" or equal_pos == -1:
                 raise SyntaxError("Invalid entity definition '{val}'".format(val=s))
 
             index = int(s[1:equal_pos])
             entity = parse_entity(s[equal_pos + 1:])
+
+            # START EDIT - AMi 20201210
+            entity.code_block = s
+            # END EDIT
 
             if index > 0:
                 self.entities[index] = entity
@@ -76,8 +79,8 @@ class Database(StatementFileReader):
                 last_printout_time = now
                 sys.stderr.write("  index={i}\n".format(i=index))
 
-            #print "  type={t}".format(t=entity.rtype)
-            #print "  args={a}".format(a=entity.args)
+            # print "  type={t}".format(t=entity.rtype)
+            # print "  args={a}".format(a=entity.args)
 
         self.fd.close()
 

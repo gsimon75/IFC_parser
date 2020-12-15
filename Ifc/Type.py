@@ -1,4 +1,9 @@
-from ClassRegistry import ifc_definition
+# START EDIT - AMi 20201210 - added to store code block
+import os
+# END EDIT
+
+from nf_express_source.ifc_parser.Ifc.ClassRegistry import ifc_definition
+
 
 @ifc_definition
 class Type:
@@ -9,9 +14,21 @@ class Type:
 
     def __init__(self, classname, defname, defspec, parser):
         self.classname = classname
+        self.defname = defname
+
+        # START EDIT - AMi 20201210 - added to store code block
+        self.code_block = \
+            self.classname + ' ' + self.defname + ';'
+
+        if defspec:
+            self.code_block += \
+                os.linesep + defspec
+        # END EDIT
+
+        if defspec == None and parser == None:
+            return
         if not defspec.startswith("="):
             raise SyntaxError("Specification of Type {dn} should start with '='".format(dn=defname))
-        self.defname = defname
         defspec = defspec[1:].lstrip()
 
         # don't care about string length
@@ -32,12 +49,23 @@ class Type:
             pass
         else:
             self.ttype = "SCALAR"
-            self.basetype = defspec;
+            self.basetype = defspec
             pass
+
+        if parser is None:
+            return
 
         # process constraints, FIXME: now just skip them
         while True:
-            s = parser.read_statement(permit_eof=False, zap_whitespaces=True)
+            # START EDIT - AMi 20201210 - changed first line to keep whitespaces for code_block text
+            s = parser.read_statement(permit_eof=False, zap_whitespaces=False)
+
+            self.code_block += \
+                os.linesep + s + ';'
+
+            s = \
+                s.strip()
+            # END EDIT
             if s == "END_TYPE":
                 break
 

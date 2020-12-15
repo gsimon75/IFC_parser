@@ -1,5 +1,10 @@
-from ClassRegistry import ifc_definition
-from Misc import find_matching_paren_pair
+# START EDIT - AMi 20201210 - added to store code block
+import os
+# END EDIT
+
+from nf_express_source.ifc_parser.Ifc.ClassRegistry import ifc_definition
+from nf_express_source.ifc_parser.Ifc.Misc import find_matching_paren_pair
+
 
 @ifc_definition
 class Entity:
@@ -7,28 +12,39 @@ class Entity:
     An ENTITY definition in an Express schema
     """
 
-    def __init__(self, classname, defname, defspec, parser):
+    def __init__(self, classname, defname, defspec: str, parser):
         self.classname = classname
         self.defname = defname
-        
+
         self.is_abstract = False
         self.supertype_of = None
         self.subtype_of = None
+
+        # START EDIT - AMi 20201210 - added to store code block
+        self.code_block = \
+            self.classname + ' ' + self.defname + ';'
+
+        if defspec:
+            self.code_block += \
+                os.linesep + defspec
+        # END EDIT
 
         # try parsing an inheritance specification statement
         while defspec:
             if defspec.startswith("ABSTRACT "):
                 self.is_abstract = True
                 defspec = defspec[9:].lstrip()
+                if defspec.strip().startswith("SUPERTYPE") and not defspec.strip().startswith('SUPERTYPE OF'):
+                    defspec = defspec[9:].lstrip()
                 continue
 
-            if defspec.startswith("SUPERTYPE OF ("):
+            if defspec.startswith(("SUPERTYPE OF (", "SUPERTYPE OF(")):
                 (open_pos, close_pos) = find_matching_paren_pair(defspec)
                 self.supertype_of = defspec[open_pos + 1:close_pos]
                 defspec = defspec[close_pos + 1:].lstrip()
                 continue
 
-            if defspec.startswith("SUBTYPE OF ("):
+            if defspec.startswith(("SUBTYPE OF (", "SUBTYPE OF(")):
                 (open_pos, close_pos) = find_matching_paren_pair(defspec)
                 self.subtype_of = defspec[open_pos + 1:close_pos]
                 defspec = defspec[close_pos + 1:].lstrip()
@@ -38,11 +54,19 @@ class Entity:
 
         # parse the body
         current_section = "DECLARATION"
-        self.clauses = {current_section: []} # key: 'DECLARATION', 'INVERSE', 'DERIVE', 'UNIQUE', 'WHERE', value: []
+        self.clauses = {current_section: []}  # key: 'DECLARATION', 'INVERSE', 'DERIVE', 'UNIQUE', 'WHERE', value: []
         s = ""
         while True:
             if not s:
-                s = parser.read_statement(permit_eof=False, zap_whitespaces=True)
+                # START EDIT - AMi 20201210 - changed first line to keep whitespaces for code_block text
+                s = parser.read_statement(permit_eof=False, zap_whitespaces=False)
+
+                self.code_block += \
+                    os.linesep + s + ';'
+
+                s = \
+                    s.strip()
+                # END EDIT
             if s == "END_ENTITY":
                 break
 
@@ -74,7 +98,7 @@ class Entity:
                 if not current_section in self.clauses:
                     self.clauses[current_section] = []
 
-                self.clauses[current_section].append( {
+                self.clauses[current_section].append({
                     "name": clausename,
                     "value": s[colon_pos + 1:].lstrip()
                 })
@@ -87,11 +111,11 @@ class Entity:
 
     def __str__(self):
         return "Entity({dn}), is_abstract={a}, subtype_of={sub}, supertype_of={sup}\n{decls}".format(
-                dn=self.defname,
-                a=self.is_abstract,
-                sub=self.subtype_of,
-                sup=self.supertype_of,
-                decls="\n".join(map(lambda d: "\t<{n}:{v}>".format(n=d["name"], v=d["value"]), self.clauses["DECLARATION"])))
-
+            dn=self.defname,
+            a=self.is_abstract,
+            sub=self.subtype_of,
+            sup=self.supertype_of,
+            decls="\n".join(
+                map(lambda d: "\t<{n}:{v}>".format(n=d["name"], v=d["value"]), self.clauses["DECLARATION"])))
 
 # vim: set sw=4 ts=4 et:
