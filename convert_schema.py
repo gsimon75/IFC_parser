@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from jinja2 import Environment, FileSystemLoader, contextfilter
 
-from nf_express_source.ifc_parser.Ifc import SchemaParser
 
 # parse the commandline arguments
 # ap = argparse.ArgumentParser(
@@ -13,6 +12,8 @@ from nf_express_source.ifc_parser.Ifc import SchemaParser
 # args = vars(ap.parse_args())
 
 # initialise the jinja2 engine
+from Ifc.SchemaParser import SchemaParser
+
 env = Environment(
     loader=FileSystemLoader('./templates'),
     trim_blocks=True,

@@ -2,7 +2,7 @@
 import os
 # END EDIT
 
-from nf_express_source.ifc_parser.Ifc.ClassRegistry import ifc_definition
+from Ifc.ClassRegistry import ifc_definition
 
 
 @ifc_definition

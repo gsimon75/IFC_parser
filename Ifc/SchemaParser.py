@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-from nf_express_source.ifc_parser.Ifc.ClassRegistry import create_definition
-from nf_express_source.ifc_parser.Ifc.Misc import StatementFileReader
+from Ifc.ClassRegistry import create_definition
+from Ifc.Misc import StatementFileReader
 
 
 class SchemaParser(StatementFileReader):

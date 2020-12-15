@@ -1,4 +1,4 @@
-from nf_express_source.ifc_parser.Ifc.ClassRegistry import ifc_fallback_definition
+from Ifc.ClassRegistry import ifc_fallback_definition
 
 
 @ifc_fallback_definition

@@ -1,5 +1,5 @@
-from nf_express_source.ifc_parser.Ifc.ClassRegistry import ifc_class
-from nf_express_source.ifc_parser.Ifc.IfcBase import IfcEntity, STRING
+from Ifc.ClassRegistry import ifc_class
+from Ifc.IfcBase import IfcEntity, STRING
 
 
 @ifc_class

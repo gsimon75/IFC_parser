@@ -2,8 +2,8 @@
 import argparse
 import json
 
-from nf_express_source.ifc_parser.Ifc import Database
-from nf_express_source.ifc_parser.Ifc.Misc import IfcJSONEncoder
+from Ifc.Database import Database
+from Ifc.Misc import IfcJSONEncoder
 
 ap = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter,

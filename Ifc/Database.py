@@ -2,8 +2,8 @@
 import sys
 import time
 
-from nf_express_source.ifc_parser.Ifc.IfcBase import STEPHeader
-from nf_express_source.ifc_parser.Ifc.Misc import StatementFileReader, parse_entity
+from Ifc.IfcBase import STEPHeader
+from Ifc.Misc import StatementFileReader, parse_entity
 
 
 class Database(StatementFileReader):

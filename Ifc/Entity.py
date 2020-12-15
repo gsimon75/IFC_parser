@@ -2,8 +2,8 @@
 import os
 # END EDIT
 
-from nf_express_source.ifc_parser.Ifc.ClassRegistry import ifc_definition
-from nf_express_source.ifc_parser.Ifc.Misc import find_matching_paren_pair
+from Ifc.ClassRegistry import ifc_definition
+from Ifc.Misc import find_matching_paren_pair
 
 
 @ifc_definition
