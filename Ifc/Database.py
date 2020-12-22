@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys
 import time
+import re
 
 from Ifc.IfcBase import STEPHeader
 from Ifc.Misc import StatementFileReader, parse_entity
@@ -65,14 +66,18 @@ class Database(StatementFileReader):
                 raise SyntaxError("Invalid entity definition '{val}'".format(val=s))
 
             index = int(s[1:equal_pos])
-            entity = parse_entity(s[equal_pos + 1:])
 
-            # START EDIT - AMi 20201210
-            entity.code_block = s
-            # END EDIT
+            expression = s[equal_pos + 1:].strip()
 
-            if index > 0:
-                self.entities[index] = entity
+            if self.__expression_is_complex_entity_instance(expression=expression):
+                self.__process_complex_entity(
+                    expression=expression,
+                    index=index)
+
+            else:
+                self.__process_simple_entity(
+                    expression=expression,
+                    index=index)
 
             now = time.time()
             if (last_printout_time + 1) <= now:
@@ -84,4 +89,60 @@ class Database(StatementFileReader):
 
         self.fd.close()
 
-# vim: set sw=4 ts=4 et:
+    # vim: set sw=4 ts=4 et:
+
+    def __process_complex_entity(
+            self,
+            expression: str,
+            index: int):
+        simple_entity_instances = \
+            self.__get_all_simple_entity_instances_in_compex_entity_instance(
+                expression=expression)
+
+        for simple_entity_instance in simple_entity_instances:
+            entity = parse_entity(simple_entity_instance)
+
+            entity.code_block = expression
+
+            if index > 0:
+                self.entities[index] = entity
+
+    def __process_simple_entity(
+            self,
+            expression: str,
+            index: int):
+        entity = \
+            parse_entity(
+                expression)
+
+        entity.code_block = \
+            expression
+
+        if index > 0:
+            self.entities[index] = entity
+
+    def __expression_is_complex_entity_instance(
+            self,
+            expression: str) \
+            -> bool:
+        if expression[0] == '(' and expression[-1] == ')' and len(expression) > 2:
+            if expression[1] == '*':
+                return False
+            else:
+                return True
+        else:
+            return \
+                False
+
+    def __get_all_simple_entity_instances_in_compex_entity_instance(
+            self,
+            expression: str) \
+            -> list:
+        complex_entity_instane_pattern = re.compile(pattern='[^()]+\([^\()]*\)')
+
+        simple_entity_instances = \
+            complex_entity_instane_pattern.findall(
+                string=expression)
+
+        return \
+            simple_entity_instances
