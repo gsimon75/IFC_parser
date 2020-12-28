@@ -1,7 +1,7 @@
-#!/usr/bin/env python
+import math
+import re
 import sys
 import time
-import re
 
 from Ifc.IfcBase import STEPHeader
 from Ifc.Misc import StatementFileReader, parse_entity
@@ -53,7 +53,7 @@ class Database(StatementFileReader):
         # read all entities from the input
         while True:
             statement = self.read_statement()
-            if statement == None:
+            if statement is None:
                 break
             # print "Statement: {statement}".format(statement=statement)
 
@@ -73,13 +73,13 @@ class Database(StatementFileReader):
                 self.__process_complex_entity(
                     statement=statement,
                     expression=expression,
-                    index=index)
+                    complex_entity_index=index)
 
             else:
                 self.__process_simple_entity(
                     statement=statement,
                     expression=expression,
-                    index=index)
+                    simple_entity_index=index)
 
             now = time.time()
             if (last_printout_time + 1) <= now:
@@ -91,31 +91,40 @@ class Database(StatementFileReader):
 
         self.fd.close()
 
-    # vim: set sw=4 ts=4 et:
-
     def __process_complex_entity(
             self,
             statement: str,
             expression: str,
-            index: int):
+            complex_entity_index: int):
         simple_entity_instances = \
             self.__get_all_simple_entity_instances_in_compex_entity_instance(
                 expression=expression)
 
+        simple_entity_index_step = \
+            self.__find_index_step_for_simple_entities(
+                complex_entity_count=len(simple_entity_instances))
+
+        simple_entity_count = 0
+
         for simple_entity_instance in simple_entity_instances:
+            simple_entity_count += 1
+
             entity = parse_entity(simple_entity_instance)
 
             entity.code_block = \
                 statement
 
-            if index > 0:
-                self.entities[index] = entity
+            simple_entity_index = \
+                complex_entity_index + simple_entity_count * simple_entity_index_step
+
+            if complex_entity_index > 0:
+                self.entities[simple_entity_index] = entity
 
     def __process_simple_entity(
             self,
             statement: str,
             expression: str,
-            index: int):
+            simple_entity_index: int):
         entity = \
             parse_entity(
                 expression)
@@ -123,11 +132,11 @@ class Database(StatementFileReader):
         entity.code_block = \
             statement
 
-        if index > 0:
-            self.entities[index] = entity
+        if simple_entity_index > 0:
+            self.entities[simple_entity_index] = entity
 
+    @staticmethod
     def __expression_is_complex_entity_instance(
-            self,
             expression: str) \
             -> bool:
         if expression[0] == '(' and expression[-1] == ')' and len(expression) > 2:
@@ -139,8 +148,8 @@ class Database(StatementFileReader):
             return \
                 False
 
+    @staticmethod
     def __get_all_simple_entity_instances_in_compex_entity_instance(
-            self,
             expression: str) \
             -> list:
         complex_entity_instane_pattern = re.compile(pattern='[^()]+\([^\()]*\)')
@@ -151,3 +160,16 @@ class Database(StatementFileReader):
 
         return \
             simple_entity_instances
+
+    @staticmethod
+    def __find_index_step_for_simple_entities(
+            complex_entity_count: int) \
+            -> float:
+        simple_entity_index_depth = \
+            math.ceil(math.log10(complex_entity_count))
+
+        simple_entity_index_step = \
+            1.0 / math.pow(10, simple_entity_index_depth)
+
+        return \
+            simple_entity_index_step
