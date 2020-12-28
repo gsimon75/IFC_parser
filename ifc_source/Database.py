@@ -3,8 +3,8 @@ import re
 import sys
 import time
 
-from Ifc.IfcBase import STEPHeader
-from Ifc.Misc import StatementFileReader, parse_entity
+from ifc_source.IfcBase import STEPHeader
+from ifc_source.Misc import StatementFileReader, parse_entity
 
 
 class Database(StatementFileReader):

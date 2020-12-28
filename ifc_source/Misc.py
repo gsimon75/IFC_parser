@@ -3,8 +3,8 @@ import re
 import struct
 import uuid
 
-from Ifc.ClassRegistry import create_entity
-from Ifc.IfcBase import Reference, EnumValue, omitted
+from ifc_source.ClassRegistry import create_entity
+from ifc_source.IfcBase import Reference, EnumValue, omitted
 
 
 class StatementFileReader:

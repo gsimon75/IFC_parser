@@ -2,8 +2,8 @@
 import os
 # END EDIT
 
-from Ifc.ClassRegistry import ifc_definition
-from Ifc.Misc import find_matching_paren_pair
+from ifc_source.ClassRegistry import ifc_definition
+from ifc_source.Misc import find_matching_paren_pair
 
 
 @ifc_definition

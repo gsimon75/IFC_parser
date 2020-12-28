@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-from Ifc.ClassRegistry import create_definition
-from Ifc.Misc import StatementFileReader
+from ifc_source.ClassRegistry import create_definition
+from ifc_source.Misc import StatementFileReader
 
 
 class SchemaParser(StatementFileReader):

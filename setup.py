@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='ifc_parser',
-    version='1.0',
+    version='1.1',
     description='IFC Parser',
     author='Pawel Garbacz',
     author_email='garbaczp@borogroup.co.uk',

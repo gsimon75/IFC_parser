@@ -1,4 +1,4 @@
-from Ifc.ClassRegistry import ifc_definition
+from ifc_source.ClassRegistry import ifc_definition
 
 
 @ifc_definition

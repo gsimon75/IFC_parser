@@ -1,5 +1,5 @@
-from Ifc.ClassRegistry import ifc_class
-from Ifc.IfcBase import IfcEntity, STRING
+from ifc_source.ClassRegistry import ifc_class
+from ifc_source.IfcBase import IfcEntity, STRING
 
 
 @ifc_class

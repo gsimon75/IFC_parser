@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader, contextfilter
 # args = vars(ap.parse_args())
 
 # initialise the jinja2 engine
-from Ifc.SchemaParser import SchemaParser
+from ifc_source.SchemaParser import SchemaParser
 
 env = Environment(
     loader=FileSystemLoader('./templates'),
@@ -49,7 +49,7 @@ schema = parser.read_schema_file('schemas/IFC4x1_FINAL.exp')
 
 primitive_types = ["BOOLEAN", "REAL", "BINARY", "INTEGER", "NUMBER", "STRING", "LOGICAL"]
 # create the output file and write the necessary import statements
-fd = open('Ifc/Ifc_All.py', "w")
+fd = open('ifc_source/Ifc_All.py', "w")
 fd.write("from ClassRegistry import ifc_class, ifc_abstract_class\n")
 fd.write("from IfcBase import IfcEntity, {pr}\n".format(pr=", ".join(primitive_types)))
 fd.write("from Misc import parse_uuid\n")

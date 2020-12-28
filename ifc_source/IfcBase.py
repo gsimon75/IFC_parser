@@ -1,4 +1,4 @@
-from Ifc.ClassRegistry import ifc_class, ifc_abstract_class, ifc_fallback_class
+from ifc_source.ClassRegistry import ifc_class, ifc_abstract_class, ifc_fallback_class
 
 
 @ifc_abstract_class
