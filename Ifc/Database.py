@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-from Misc import StatementFileReader, parse_entity
-from IfcBase import IfcEntity, IfcGenericEntity, STEPHeader
-import STEP_Header_Parts
+from Ifc.Misc import StatementFileReader, parse_entity
+from Ifc.IfcBase import IfcEntity, IfcGenericEntity, STEPHeader
+import Ifc.STEP_Header_Parts
 import time
 import sys
 

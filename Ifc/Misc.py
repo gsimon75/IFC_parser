@@ -1,8 +1,8 @@
 import json
 import uuid
 import struct
-from ClassRegistry import create_entity
-from IfcBase import Omitted, Reference, EnumValue, omitted
+from Ifc.ClassRegistry import create_entity
+from Ifc.IfcBase import Omitted, Reference, EnumValue, omitted
 
 
 class StatementFileReader:
@@ -183,13 +183,13 @@ class StatementFileReader:
             elif s[pos:pos + 4] == "\\X2\\":
                 if endpos < pos + 4:
                     raise SyntaxError("Unterminated X2 escape block in {val}".format(val=s))
-                s = s[:pos] + "".join(unichr(int(s[i:i + 4], base=16)) for i in xrange(pos + 4, endpos, 4)) + s[endpos:]
+                s = s[:pos] + "".join(unichr(int(s[i:i + 4], base=16)) for i in range(pos + 4, endpos, 4)) + s[endpos:]
                 endpos = -1
                 pos -= 3
             elif s[pos:pos + 4] == "\\X4\\":
                 if endpos < pos + 4:
                     raise SyntaxError("Unterminated X4 escape block in {val}".format(val=s))
-                s = s[:pos] + "".join(unichr(int(s[i:i + 8], base=16)) for i in xrange(pos + 4, endpos, 8)) + s[endpos:]
+                s = s[:pos] + "".join(unichr(int(s[i:i + 8], base=16)) for i in range(pos + 4, endpos, 8)) + s[endpos:]
                 endpos = -1
                 pos -= 3
             else:
@@ -209,7 +209,7 @@ def find_matching_paren_pair(s):
     """
     paren_level = -1
     open_pos = 0
-    for i in xrange(0, len(s)):
+    for i in range(0, len(s)):
         if s[i] == "(":
             paren_level += 1
             if paren_level == 0:
@@ -261,7 +261,7 @@ def parse_expression(s):
         item_start = 0
         within_quote = False
         after_backslash = False
-        for i in xrange(0, len(s)):
+        for i in range(0, len(s)):
             if within_quote:
                 if after_backslash:
                     after_backslash = False
@@ -352,7 +352,7 @@ def parse_uuid(s):
     """
     Parses an IFC-encoded uuid. Don't blame me, I wasn't there when they unvented it...
     """
-    v = map(lambda c: IFC_symbol_to_num[c], s)
+    v = list(map(lambda c: IFC_symbol_to_num[c], s))
     i = 0
     b = []
     while True:

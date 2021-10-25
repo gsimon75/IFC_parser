@@ -1,13 +1,13 @@
 #!/usr/bin/env python
-from Misc import StatementFileReader
-from ClassRegistry import create_definition
+from Ifc.Misc import StatementFileReader
+from Ifc.ClassRegistry import create_definition
 
-from GenericDefinition import GenericDefinition
-from Entity import Entity
-from Function import Function
-from Type import Type
-from Rule import Rule
-from Schema import Schema
+from Ifc.GenericDefinition import GenericDefinition
+from Ifc.Entity import Entity
+from Ifc.Function import Function
+from Ifc.Type import Type
+from Ifc.Rule import Rule
+from Ifc.Schema import Schema
 
 class SchemaParser(StatementFileReader):
     """
@@ -54,7 +54,7 @@ class SchemaParser(StatementFileReader):
             defspec = ''
         else:
             classname = s[:space_pos]
-            for i in xrange(space_pos + 1, len(s)):
+            for i in range(space_pos + 1, len(s)):
                 c = s[i]
                 if not(c.isalnum() or c == "_"):
                     classname_end_pos = i

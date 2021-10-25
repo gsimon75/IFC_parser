@@ -1,4 +1,4 @@
-from ClassRegistry import ifc_class, ifc_abstract_class, ifc_fallback_class
+from Ifc.ClassRegistry import ifc_class, ifc_abstract_class, ifc_fallback_class
 
 @ifc_abstract_class
 class IfcEntity:

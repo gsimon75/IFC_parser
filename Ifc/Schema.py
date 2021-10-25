@@ -1,4 +1,4 @@
-from ClassRegistry import ifc_definition
+from Ifc.ClassRegistry import ifc_definition
 
 @ifc_definition
 class Schema:

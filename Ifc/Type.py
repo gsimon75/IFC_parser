@@ -1,4 +1,4 @@
-from ClassRegistry import ifc_definition
+from Ifc.ClassRegistry import ifc_definition
 
 @ifc_definition
 class Type:
@@ -40,6 +40,11 @@ class Type:
             s = parser.read_statement(permit_eof=False, zap_whitespaces=True)
             if s == "END_TYPE":
                 break
+
+
+    def __lt__(self, other):
+        return self.defname < other.defname
+
 
     def __str__(self):
         return "Type({dn}) {ds}".format(dn=self.defname, ds=self.defspec)

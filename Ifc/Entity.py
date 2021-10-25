@@ -1,5 +1,5 @@
-from ClassRegistry import ifc_definition
-from Misc import find_matching_paren_pair
+from Ifc.ClassRegistry import ifc_definition
+from Ifc.Misc import find_matching_paren_pair
 
 @ifc_definition
 class Entity:
@@ -83,6 +83,10 @@ class Entity:
 
             # out of ideas
             raise SyntaxError("Cannot interpret body '{val}' in Type {n}".format(val=s, n=self.defname))
+
+
+    def __lt__(self, other):
+        return self.defname < other.defname
 
 
     def __str__(self):

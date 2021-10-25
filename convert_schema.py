@@ -49,23 +49,25 @@ schema = parser.read_schema_file(args["schema"])
 primitive_types = ["BOOLEAN", "REAL", "BINARY", "INTEGER", "NUMBER", "STRING", "LOGICAL"]
 # create the output file and write the necessary import statements
 fd = open(args["module"], "w")
-fd.write("from ClassRegistry import ifc_class, ifc_abstract_class\n")
-fd.write("from IfcBase import IfcEntity, {pr}\n".format(pr=", ".join(primitive_types)))
-fd.write("from Misc import parse_uuid\n")
+fd.write("from Ifc.ClassRegistry import ifc_class, ifc_abstract_class\n")
+fd.write("from Ifc.IfcBase import IfcEntity, {pr}\n".format(pr=", ".join(primitive_types)))
+fd.write("from Ifc.Misc import parse_uuid\n")
 # I know it's a hack, but I need `str()` to handle non-ascii characters
 # *I know* that utf8 output will be fine, so dear python please let me use it...
 # No, I definitely WON'T explicitely write `x.encode(...)` everywhere
 fd.write("import sys\n")
-fd.write("reload(sys)\n")
-fd.write("sys.setdefaultencoding('UTF8')\n")
+fd.write("if sys.version_info < (3,):\n")
+fd.write("    reload(sys)\n")
+fd.write("    sys.setdefaultencoding('UTF8')\n")
 fd.write("\n")
 
 # Python requires the base class declared before the derived classes, so we'll proceed step
 # by step, always dump those entities whose prerequisites are already dumped.
-remaining = filter(lambda t: t.ttype == "SCALAR", schema.classes["TYPE"].values())
+remaining = list(filter(lambda t: t.ttype == "SCALAR", schema.classes["TYPE"].values()))
+remaining.sort() # for reproducible output
 already_dumped = set(primitive_types)
 while remaining:
-    for typedef in list(remaining):
+    for typedef in remaining:
         if typedef.basetype in already_dumped:
             typedef_template.stream(typedef.__dict__).dump(fd)
             remaining.remove(typedef)
@@ -73,10 +75,11 @@ while remaining:
 
 # Python requires the base class declared before the derived classes, so we'll proceed step
 # by step, always dump those entities whose prerequisites are already dumped.
-remaining = schema.classes["ENTITY"].values()
+remaining = list(schema.classes["ENTITY"].values())
+remaining.sort() # for reproducible output
 already_dumped = set()
 while remaining:
-    for entity in list(remaining):
+    for entity in remaining:
         if not entity.subtype_of or entity.subtype_of in already_dumped:
             entity_template.stream(entity.__dict__).dump(fd)
             remaining.remove(entity)

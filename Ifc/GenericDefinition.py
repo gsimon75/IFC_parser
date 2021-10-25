@@ -1,4 +1,4 @@
-from ClassRegistry import ifc_fallback_definition
+from Ifc.ClassRegistry import ifc_fallback_definition
 
 @ifc_fallback_definition
 class GenericDefinition:
